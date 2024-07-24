@@ -1,0 +1,27 @@
+{
+  "name": "rd_webgpu",
+  "version": "1.0.0",
+  "description": "reaction-diffusion using webgpu proof of concept",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/rd_webgpu.umd.js",
+  "module": "./dist/rd_webgpu.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/rd_webgpu.es.js",
+      "require": "./dist/rd_webgpu.umd.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^5.3.4"
+  }
+}
