@@ -1,0 +1,22 @@
+
+<h1>Test</h1>
+
+All output goes to the console log. <br>
+
+<button onclick="go()">Press me to go.</button>
+
+<script type="module">
+import {
+    name, 
+    webgpu_volume,
+    rdTest,
+} from "./lib/main.js";
+console.log("imported name: ", name);
+console.log("imported webgpu_volume: ", webgpu_volume.name);
+
+window.go = function() {
+    console.log("go pressed");
+    rdTest.test()
+};
+
+</script>
