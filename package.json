@@ -23,5 +23,8 @@
   "license": "ISC",
   "devDependencies": {
     "vite": "^5.3.4"
+  },
+  "dependencies": {
+    "webgpu_volume": "github:AaronWatters/webgpu_volume"
   }
 }
