@@ -46,8 +46,8 @@ fn main(@builtin(global_invocation_id) global_id : vec3u) {
         let Aij = outputDB.data_and_depth[outputLocation.data_offset];
         let Bij = outputDB.data_and_depth[outputLocation.depth_offset];
         // next values of A and B at this location
-        //var Aijnext = Aij;
-        //var Bijnext = Bij;
+        var Aijnext = Aij;
+        var Bijnext = Bij;
 
         // something arbitrary
         Aijnext = Aij - Bij + k - f;
