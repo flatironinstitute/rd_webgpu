@@ -5,6 +5,8 @@ All output goes to the console log. <br>
 
 <button onclick="go()">Press me to go.</button>
 
+<canvas id="canvas" width="1000" height="1000"></canvas>
+
 <script type="module">
 import {
     name, 
@@ -14,12 +16,15 @@ import {
 console.log("imported name: ", name);
 console.log("imported webgpu_volume: ", webgpu_volume.name);
 
-window.go = function() {
+var canvas = document.getElementById("canvas");
+var pipeline = null;
+
+window.go = async function() {
     console.log("go pressed");
-    rdTest.test()
+    if (pipeline == null) {
+        pipeline = await rdTest.test2(canvas);
+    }
+    await pipeline.run();
 };
 
 </script>
-
-<br>
-<a href="rd_run.html">Run visual test</a>
