@@ -1,0 +1,50 @@
+
+<h1>Test</h1>
+
+All output goes to the console log. <br>
+
+<button onclick="go()">Press me to go.</button>
+
+<br>
+
+<canvas id="canvas" width="1000" height="1000"></canvas>
+
+<br>
+
+<pre id="count">0</pre>
+
+<script type="module">
+import {
+    name, 
+    webgpu_volume,
+    rdTest,
+} from "./lib/main.js";
+console.log("imported name: ", name);
+console.log("imported webgpu_volume: ", webgpu_volume.name);
+
+var canvas = document.getElementById("canvas");
+var pipeline = null;
+
+window.go = async function() {
+    console.log("go pressed");
+    if (pipeline == null) {
+        pipeline = await rdTest.test2(canvas);
+    }
+    //await pipeline.run();
+    var limit = 1000;
+    //limit = 2; // debugging
+    const count = document.getElementById("count");
+    async function animate() {
+        if (limit > 0) {
+            count.textContent = "remaining: " + limit;
+            await pipeline.run();
+            limit -= 1;
+            requestAnimationFrame(animate);
+        } else {
+            count.textContent = "done";
+        }
+    };
+    animate();
+};
+
+</script>
