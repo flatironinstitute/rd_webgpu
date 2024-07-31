@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2d reaction diffusion proof of concept</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            margin-top: 20px;
+        }
+        .container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #myCanvas {
+            display: block;
+            margin: 20px auto;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<script type="module">
+import * as rd_webgpu from "./rd_webgpu.es.js";
+var canvas = document.getElementById("myCanvas");
+var count = document.getElementById("count");
+var pipeline = null;
+
+window.go = async function() {
+    console.log("go pressed");
+    if (pipeline == null) {
+        pipeline = await rd_webgpu.rdTest.test2(canvas);
+    }
+    var limit = 10000;
+    await pipeline.run();
+    async function animate() {
+        if (limit > 0) {
+            count.textContent = "remaining: " + limit;
+            await pipeline.run();
+            limit -= 1;
+            requestAnimationFrame(animate);
+        } else {
+            count.textContent = "done";
+        }
+    };
+    animate();
+};
+
+</script>
+    <header>
+        <h1>2d reaction diffusion proof of concept</h1>
+    </header>
+    <div class="container">
+        <p>The following generates a reaction diffusion pattern
+            where the "kill" and "feed" parameters vary across the canvas.</p>
+        <button onclick="go()">Run</button><br>
+        <canvas id="myCanvas" width="1000" height="1000"></canvas>
+        <br>
+        <pre id="count">0</pre>
+    </div>
+</body>
+</html>
