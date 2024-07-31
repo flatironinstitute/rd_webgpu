@@ -26,51 +26,75 @@ struct parameters {
 
 @group(2) @binding(0) var<storage, read> parms: parameters;
 
+// define a linear workgroup size of length 256
 @compute @workgroup_size(256)
 fn main(@builtin(global_invocation_id) global_id : vec3u) {
-    let outputOffset = global_id.x;
-    let outputShape = outputDB.shape;
+    // output into the depth buffer
+    let outputOffset = global_id.x; // output offset of this group (1D)
+    let outputShape = outputDB.shape; 
     let outputLocation = depth_buffer_indices(outputOffset, outputShape);
+
+    // after gotten the output location
     if (outputLocation.valid) {
         // get the parameters for this location
         let DA = parms.DA;
         let DB = parms.DB;
         let dt = parms.dt;
+
         // get the values of k and f at this location
         let side = u32(outputDB.shape.height);
-        let flocation = u32(outputLocation.ij.x);
-        let klocation = u32(outputLocation.ij.y) + side;
+        let flocation = u32(outputLocation.ij.x); // f goes horizontally
+        let klocation = u32(outputLocation.ij.y) + side; // k goes vertically
         let f = inputBuffer[flocation];
         let k = inputBuffer[klocation];
+
         // initial values of A and B at this location
-        let Aij = outputDB.data_and_depth[outputLocation.data_offset];
-        let Bij = outputDB.data_and_depth[outputLocation.depth_offset];
-        // next values of A and B at this location
-        var Aijnext = Aij;
-        var Bijnext = Bij;
+        var initAij = outputDB.data_and_depth[outputLocation.data_offset]; // A is the "value" portion
+        var initBij = outputDB.data_and_depth[outputLocation.depth_offset]; // B is the "depth" portion
 
-        // something arbitrary
-        Aijnext = Aij - Bij + k - f;
-        Bijnext = -Aij + Bij + k + f;
-        // Do the reaction diffusion update
-        // xxx fill in the code here...
+        // ------------------------- Calculating discrete laplacian -------------------------
+        let i = outputLocation.ij.x;
+        let j = outputLocation.ij.y;
 
-        // FOR DEBUGGING... just switch the values
-        //Aijnext = Bij;
-        //Bijnext = Aij;
+        // get the four directional vectors
+        let up = vec2i(i - 1, j);
+        let down = vec2i(i + 1, j);
+        let right = vec2i(i, j + 1);
+        let left = vec2i(i, j - 1);
 
-        // FOR DEBUGGING... put k in A and f in B
-        Aijnext = k;
-        Bijnext = f;
+        // get the four required values to calculate
+        let above = depth_buffer_location_of(up, outputShape);
+        let below = depth_buffer_location_of(down, outputShape);
+        let r = depth_buffer_location_of(right, outputShape);
+        let l = depth_buffer_location_of(left, outputShape);
 
-        // for DEBUGGING... put DA in A and DB in B
-        //Aijnext = DA;
-        //Bijnext = DB;
-        if (outputOffset == 0) {
-            Aijnext = dt;
-        }
+        // calculate the laplacian
+        let LAij = -4 * initAij + outputDB.data_and_depth[above.data_offset]
+        + outputDB.data_and_depth[below.data_offset]
+        + outputDB.data_and_depth[r.data_offset]
+        + outputDB.data_and_depth[l.data_offset];
 
-        // write the updated values back to the depth buffer
+        let LBij = -4 * initBij + outputDB.data_and_depth[above.depth_offset]
+        + outputDB.data_and_depth[below.depth_offset]
+        + outputDB.data_and_depth[r.depth_offset]
+        + outputDB.data_and_depth[l.depth_offset];
+
+        // ------------------------- Gray Scott Update -------------------------
+
+        let diffAij = (DA * LAij - initAij * initBij * initAij * initBij + f * (f32(1) - initAij)) * dt;
+        let diffBij = (DB * LBij + initAij * initBij * initAij * initBij - (k + f) * initBij) * dt;
+
+        var Aijnext = initAij + diffAij;
+        var Bijnext = initBij + diffBij;
+
+        // Aijnext = initBij;
+        // Bijnext = initAij;
+        
+        // if (outputOffset == 0) {
+        //     Aijnext = dt;
+        // }
+
+        // write the updated values back to the depth buffer for JS to read
         outputDB.data_and_depth[outputLocation.data_offset] = Aijnext;
         outputDB.data_and_depth[outputLocation.depth_offset] = Bijnext;
     }
