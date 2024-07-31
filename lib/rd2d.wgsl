@@ -87,8 +87,8 @@ fn main(@builtin(global_invocation_id) global_id : vec3u) {
         var Aijnext = initAij + diffAij;
         var Bijnext = initBij + diffBij;
 
-        Aijnext = initBij;
-        Bijnext = initAij;
+        // Aijnext = initBij;
+        // Bijnext = initAij;
         
         // if (outputOffset == 0) {
         //     Aijnext = dt;
