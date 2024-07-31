@@ -1,6 +1,8 @@
 # rd_webgpu
 reaction-diffusion using webgpu proof of concept
 
+<img src="rd2d.png"/>
+
 The goal is to create a webGPU implementation of reaction diffusion based on the following
 numpy implementation.
 
