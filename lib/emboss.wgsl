@@ -36,7 +36,8 @@ fn main(@builtin(global_invocation_id) global_id : vec3u) {
             let p_right = vec3f(f32(i + 1), f32(j), right * scalez);
             let p_up = vec3f(f32(i), f32(j + 1), up * scalez);
             let normal = normalize(cross(p_right - p_here, p_up - p_here));
-            let color = f_pack_color(abs(normal));
+            let shift = 0.5 * (vec3f(1.0, 1.0, 1.0) + normal);
+            let color = f_pack_color(abs(shift));
             outputBuffer[in_location.offset] = color;
         }
     }
